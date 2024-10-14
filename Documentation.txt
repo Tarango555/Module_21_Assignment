@@ -1,0 +1,29 @@
+1. Project requirements:
+    create a student registration project using express.js(only backend)------
+    1. Student Registration
+    2. Student login
+    3. Student auth by JWT token+cookie
+    4. Student profile read
+    5. Student profile update
+    6. file upload api using multer or express file upload
+    7. File read api
+    8. Single file delete api using multer or express file upload
+
+2. Working strategy:
+    1. Project skeleton
+    2. Install necessary packages
+    3. Create Models
+    4. LoginService(): 
+            - Extract student id and password from request body
+            - Start a finding query in 'students' collection using extracted student id
+            - If found, hash the password then set it to the 'students' collection
+            - Then create an access token and a refresh token
+            - Store the refresh token in a http-only cookie
+    
+    5. AuthMiddleware:
+            - Retrieve access token from request headers
+            - Decode the token. Decode returns an object containing email and id
+            - If decoding fails, show an error message
+            - If success, attach the student email and student id to the request headers
+            - Use next()
+            - Then call this AuthMiddleware to api.js and set to the routing endpoints where authentication is needed
