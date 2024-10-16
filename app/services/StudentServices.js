@@ -9,6 +9,13 @@ import {
     CreateRefreshToken,
     StoreRefreshTokenInCookie,
 } from "../utility/tokenUtility.js";
+import fs from 'fs';
+import path from "path";
+import { fileURLToPath } from 'url'; // New import to handle URLs in ES modules
+
+// Convert import.meta.url to __dirname equivalent
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 
 
@@ -71,6 +78,7 @@ export const RegistrationService= async(req)=>{
     }
 }
 
+
 export const LoginService= async(req, res)=>{
     try {
 
@@ -114,6 +122,7 @@ export const LoginService= async(req, res)=>{
     }
 }
 
+
 export const LogoutService= async(res)=>{
     try {
         res.clearCookie('RefreshToken');
@@ -126,6 +135,7 @@ export const LogoutService= async(res)=>{
         return {status: "fail", message: err.toString()};
     }
 }
+
 
 export const ReadProfileService= async(req)=>{
     try {
@@ -192,5 +202,113 @@ export const UpdateProfileService = async (req) => {
         };
     } catch (err) {
         return { status: "fail", message: err.toString() };
+    }
+};
+
+
+export const UpdateProfilePictureService = async (user, file) => {
+    try {
+        const email = user.student_email;
+
+        // Find the student's profile by their email
+        const studentProfile = await StudentProfilesModel.findOne({ student_email: email });
+        if (!studentProfile) {
+            // If no student profile found, delete the uploaded file to clean up
+            fs.unlinkSync(file.path);
+            return { status: 404, message: "Student profile not found" };
+        }
+
+        // If an old profile picture exists, delete it from the file system
+        if (studentProfile.image) {
+            const oldFilePath = path.join(__dirname, '../../', studentProfile.image);  // Now __dirname is available
+            if (fs.existsSync(oldFilePath)) {
+                fs.unlinkSync(oldFilePath);
+            }
+        }
+
+
+        // Update the new profile picture in the 'image' field of the student profile
+        const imagePath = file.path;  // Using 'file' object directly (from Multer)
+        // studentProfile.image = imagePath;  // Update the 'image' field in the model (multiple field)
+        // await studentProfile.save();  // Save the updated student profile
+
+        // For single field update
+        await StudentProfilesModel.updateOne(
+            { student_email: user.student_email },
+            { $set: { image: imagePath } }
+        );
+
+
+        return {
+            status: 200,
+            message: "Profile picture updated successfully",
+            data: { image: file.path }
+        };
+    } catch (err) {
+        // If there's an error, delete the uploaded file to avoid leftovers
+        if (file && fs.existsSync(file.path)) {
+            fs.unlinkSync(file.path);
+        }
+        return { status: 500, message: err.toString() };
+    }
+};
+
+
+export const GetProfilePictureService = async (req) => {
+    try {
+        const email = req.user.student_email;
+
+        // Fetch the student profile from the database
+        const studentProfile = await StudentProfilesModel.findOne({ student_email: email });
+
+        // Check if the student profile or profile picture does not exist
+        if (!studentProfile || !studentProfile.image) {
+            return { status: 404, message: 'Profile picture not found' }; // Return 404 for not found
+        }
+
+        // Build the URL for the profile picture
+        const profilePictureUrl = `${req.protocol}://${req.get('host')}/${studentProfile.image}`;
+
+        // Return the profile picture URL and success status
+        return {
+            status: 200,
+            message: 'Profile picture retrieved successfully',
+            data: {
+                profile_picture_url: profilePictureUrl
+            }
+        };
+    } catch (err) {
+        // Return error status 500 and error message if an exception occurs
+        return { status: 500, message: err.toString() };
+    }
+};
+
+
+export const DeleteProfilePictureService = async (user) => {
+    try {
+        const email = user.student_email;
+
+        // Find the student's profile
+        const studentProfile = await StudentProfilesModel.findOne({ student_email: email });
+
+        if (!studentProfile || !studentProfile.image) {
+            return { status: 404, message: "Profile picture not found" };
+        }
+
+        // Get the path of the old profile picture
+        const oldFilePath = path.join(__dirname, '../../', studentProfile.image);
+
+        // Check if the file exists, and delete it
+        if (fs.existsSync(oldFilePath)) {
+            fs.unlinkSync(oldFilePath);  // Delete the file from the file system
+        }
+
+        // Clear the image field from the database
+        studentProfile.image = 'uploads/default-profile.png'; //default value
+        await studentProfile.save();
+
+        return { status: 200, message: "Profile picture deleted successfully" };
+    } catch (err) {
+        return { status: 500, message: err.toString() };
     }
 };

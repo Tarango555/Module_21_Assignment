@@ -9,7 +9,7 @@ const DataSchema= new mongoose.Schema({
     blood_group: {type: String, required: true},
     date_of_birth:{type: Date, required: true},
     gender:{type: String, required: true},
-    image:{type: String, required: true},
+    image:{type: String, required: true, default: 'uploads/default-profile.png'},
     guardian_name:{type: String, required: true},
     guardian_phone:{type: String, required: true},
     address:{type: String, required: true},

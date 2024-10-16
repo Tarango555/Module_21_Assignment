@@ -9,6 +9,9 @@ import router from "./routes/api.js";
 
 const app= express();
 
+// Serve static files from the "uploads" folder
+app.use('/uploads', express.static('uploads'));
+
 //App use default middleware
 app.use(cors());
 app.use(express.json({limit: MAX_JSON_SIZE}));
