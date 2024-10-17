@@ -1,0 +1,24 @@
+1. Project:
+    create a student registration project using express.js(only backend)------
+    1. Student Registration
+    2. Student login
+    3. Student auth by JWT token+cookie
+    4. Student profile read
+    5. Student profile update
+    6. file upload api using multer or express file upload
+    7. File read api
+    8. Single file delete api using multer or express file upload
+
+2. About the project:
+    1. Students will complete their registration.
+    2. Our backend will collect their registration data, create their unique student ID 
+       and send them this ID through email so that they can log in with this ID.
+    3. Then student will log in with their given ID and password.
+    4. Then student can see their profile data.
+    5. They can update their profile.
+    6. They can upload/update profile picture. There will be already a default profile picture.
+       It will be replaced when new one will be uploaded, it will appear again when there will be no picture. 
+    7. They can see their profile picture.
+    8. They can delete their profile picture.
+    9. They can log out.
+    10. They can also upload their birth certificate.

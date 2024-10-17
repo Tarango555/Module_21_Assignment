@@ -10,6 +10,7 @@ const DataSchema= new mongoose.Schema({
     date_of_birth:{type: Date, required: true},
     gender:{type: String, required: true},
     image:{type: String, required: true, default: 'uploads/default-profile.png'},
+    birth_certificate:{type: String, required: true, default: 'uploads/default-bc.pdf'},
     guardian_name:{type: String, required: true},
     guardian_phone:{type: String, required: true},
     address:{type: String, required: true},

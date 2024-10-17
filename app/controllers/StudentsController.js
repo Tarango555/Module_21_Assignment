@@ -6,7 +6,8 @@ import {
     UpdateProfileService,
     UpdateProfilePictureService,
     GetProfilePictureService,
-    DeleteProfilePictureService
+    DeleteProfilePictureService,
+    UploadBirthCertificateService
 } from '../services/StudentServices.js';
 
 
@@ -73,16 +74,25 @@ export const UpdateProfilePicture = async (req, res) => {
     }
 };
 
+export const UploadBirthCertificate = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ status: "fail", message: "No file uploaded" });
+        }
+
+        const result = await UploadBirthCertificateService(req.user, req.file);
+        return res.status(result.status).json(result);
+    } catch (err) {
+        return res.status(500).json({ status: "fail", message: err.toString() });
+    }
+};
+
 
 export const GetProfilePicture = async (req, res) => {
     try {
-        // Call the service function
         const result = await GetProfilePictureService(req);
-
-        // Send back the status and result in the response
         return res.status(result.status).json(result);
     } catch (err) {
-        // In case of error, respond with status 500 and the error message
         return res.status(500).json({ status: "fail", message: err.toString() });
     }
 };

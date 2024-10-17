@@ -254,6 +254,45 @@ export const UpdateProfilePictureService = async (user, file) => {
 };
 
 
+// Service for uploading birth certificate
+export const UploadBirthCertificateService = async (user, file) => {
+    try {
+        const email = user.student_email;
+
+        // Find the student's profile
+        const studentProfile = await StudentProfilesModel.findOne({ student_email: email });
+        if (!studentProfile) {
+            fs.unlinkSync(file.path);  // Delete the uploaded file if no profile is found
+            return { status: 404, message: "Student profile not found" };
+        }
+
+        // If an old birth certificate exists, delete it from the file system
+        if (studentProfile.birth_certificate) {
+            const oldFilePath = path.join(__dirname, '../../', studentProfile.birth_certificate);
+            if (fs.existsSync(oldFilePath)) {
+                fs.unlinkSync(oldFilePath);  // Delete old birth certificate
+            }
+        }
+
+        // Save the new birth certificate path to the 'birth_certificate' field
+        studentProfile.birth_certificate = file.path;
+        await studentProfile.save();
+
+        return {
+            status: 200,
+            message: "Birth certificate uploaded successfully",
+            data: { birth_certificate: file.path }
+        };
+    } catch (err) {
+        // If there's an error, delete the uploaded file to avoid leftovers
+        if (file && fs.existsSync(file.path)) {
+            fs.unlinkSync(file.path);
+        }
+        return { status: 500, message: err.toString() };
+    }
+};
+
+
 export const GetProfilePictureService = async (req) => {
     try {
         const email = req.user.student_email;
